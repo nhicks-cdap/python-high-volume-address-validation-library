@@ -31,7 +31,7 @@ shelve_db : 'addresses'
 separator : ' '
 
 ## API KEY
-api_key : 'AIzaSyAC5LsptT5ys75rF4sKgokzMBi4v5pd2I4'
+api_key : ''
 
 ## Name of the output csv file
 output_csv : './output.csv'
