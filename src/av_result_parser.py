@@ -40,7 +40,7 @@ ADDRESS_LINES="addressLines"
 class av_result_parser_class:
     
 
-    def parse_av_response(self, address_validation_result):
+    def parse_av_response(self, address_validation_result, input):
         """_summary_:                 
              Check to see if result component contains verdict. Verdict contains the overall quality indicators, and should always be stored    
              If running in test mode (run mode 1), allow the application to store some data to understand Address Validation API response     
@@ -64,7 +64,7 @@ class av_result_parser_class:
 
         Returns:
             _type_: _description_
-        """
+        """git 
             
         if run_mode == 1:
             """_summary_:
@@ -73,14 +73,22 @@ class av_result_parser_class:
             Returns:
                 _type_: _description_
             """    
-            parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
-            parsed_result.update(av_result_parser_class.get_latlong(address_validation_result))
-            parsed_result[FORMATTED_ADDRESS]=av_result_parser_class.get_formatted_address(address_validation_result)
-            parsed_result.update(av_result_parser_class.get_postal_address(address_validation_result))
-            parsed_result.update(av_result_parser_class.get_verdict(address_validation_result))         
-            parsed_result.update(av_result_parser_class.get_address_type(address_validation_result))            
-            parsed_result.update(av_result_parser_class.get_usps_data(address_validation_result))
-            parsed_result.update(av_result_parser_class.get_address_components(address_validation_result))
+
+            #added a try catch to stop crashing on invalid requests (which happens if an address cant be resolved or bad data)
+            try:
+                parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
+                parsed_result.update(av_result_parser_class.get_latlong(address_validation_result))
+                parsed_result[FORMATTED_ADDRESS]=av_result_parser_class.get_formatted_address(address_validation_result)
+                parsed_result.update(av_result_parser_class.get_postal_address(address_validation_result))
+                parsed_result.update(av_result_parser_class.get_verdict(address_validation_result))         
+                parsed_result.update(av_result_parser_class.get_address_type(address_validation_result))            
+                parsed_result.update(av_result_parser_class.get_usps_data(address_validation_result))
+                parsed_result.update(av_result_parser_class.get_address_components(address_validation_result))
+
+            except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                print("Error in getting place ID")
+                #removed the raise which was ending execution upon error
 
         if run_mode == 2:
             """_summary_:
@@ -88,17 +96,26 @@ class av_result_parser_class:
 
             Returns:
                 _type_: _description_
-            """   
-            parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
-            parsed_result.update(av_result_parser_class.get_latlong(address_validation_result))
-            parsed_result.update(av_result_parser_class.get_verdict(address_validation_result))  
-            parsed_result.update(av_result_parser_class.get_address_components(address_validation_result))
+            """ 
+            try:  
+                parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
+                parsed_result.update(av_result_parser_class.get_latlong(address_validation_result))
+                parsed_result.update(av_result_parser_class.get_verdict(address_validation_result))  
+                parsed_result.update(av_result_parser_class.get_address_components(address_validation_result))
+            except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                print("Error in getting place ID")
+                #removed the raise which was ending execution upon error
 
         if run_mode == 3:
-           parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
-
-        print(" The dict with all the extracted elements is ready")
-        print(parsed_result)
+            try:
+                parsed_result[PLACE_ID]=av_result_parser_class.get_place_ID(address_validation_result)
+            except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                print("Error in getting place ID")
+                #removed the raise which was ending execution upon error
+        parsed_result['inputAddress'] = input
+        print (parsed_result)
         return parsed_result
 
     def get_address_components(address_validation_result):
@@ -160,7 +177,9 @@ class av_result_parser_class:
         except Exception as err:
             print(f"Unexpected {err=}, {type(err)=}")
             print("Error in getting place ID")
-            raise
+            return "ERROR!!!"
+            
+
 
     def get_formatted_address(address_validation_result):
         """_summary_: Get the formatted address from the AV response

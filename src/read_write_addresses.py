@@ -68,6 +68,14 @@ class read_write_addressess_class:
         
         return current_row
 
+    def get_primary_key(self, row):
+        current_row=""
+        for index,column in enumerate(self.column_numbers):
+            if (index == config.supplied_primary_key):
+                current_row+=str(row[column])
+        
+        return current_row
+
 #
 # read the csv file
 # Iterate through the file and extract each row
@@ -75,25 +83,24 @@ class read_write_addressess_class:
 #
 
     def read_csv_with_addresses(self):
-       
         # reading csv file
         with open(self.address_file, 'r') as csvfile:
+    
         # creating a csv reader object
          
             csvreader = csv.reader(csvfile)
       
             # extracting field names through first row
-     
             # extracting each data row one by one
             for row in csvreader:
                 if(config.supplied_primary_key is None):
                     final_address=self.build_address_string(row)
+                    self.insert_addresses_in_ds(final_address)
                 else:
+                    primarykey=self.get_primary_key(row)
                     final_address=self.build_address_string(row)
+                    self.insert_addresses_in_ds(final_address,primarykey)
 
-               # print("Key getting inserted in db is ",final_address )
-                self.insert_addresses_in_ds(final_address)
-       
             # get total number of rows
             #print(rows)
             print("Total no. of rows: %d"%(csvreader.line_num))        
@@ -104,19 +111,12 @@ class read_write_addressess_class:
     # storage mechanism
     #       
 
-    def insert_addresses_in_ds(self,final_address):
-
-        print("Inside insert_addresses_in_ds::::  ",final_address)
-       
-        #try:
-       # print("Hereeeee")
+    def insert_addresses_in_ds(self,final_address,key=''):
         current_address_counter=int()
         
         if final_address in self.address_datastore:
-            print("Insside first big IF ############### If ")
            
             if final_address in global_duplicate_counter:
-                print("############### Address already exiss",final_address)
                 current_address_counter = global_duplicate_counter[final_address]
                 nextCounter=current_address_counter+1
                 global_duplicate_counter[final_address] = nextCounter
@@ -126,9 +126,16 @@ class read_write_addressess_class:
                 print("The counter for ", final_address,"is ::",current_address_counter)
             
         else:
+            #remove the primary key from the stored address
+            final_address = final_address.split(' ', 1)[1]
+
             print("In else block inserting ",final_address,"to DS and to dict")
             global_duplicate_counter[final_address] = 1
-            self.address_datastore[final_address]={"Nothing"}
+            
+            if (config.supplied_primary_key is None):
+                self.address_datastore[final_address]={"Nothing"}
+            else:
+                self.address_datastore[key] = final_address
 
     # 
     # Close the connection to the shelve datastore

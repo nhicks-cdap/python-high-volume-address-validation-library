@@ -75,19 +75,29 @@ class HighVolumeAVMain:
             # After validation store the address back in the shelve store
         
             for key in address_datastore:
-                address_validation_result = gmaps.addressvalidation(key)
-                parsed_response=av_result_parser_load.parse_av_response(address_validation_result)
-                address_datastore[key] = parsed_response
+                try:
+                    #pass address through without the primary key
+                    address_validation_result = gmaps.addressvalidation(address_datastore[key])
 
-                # Increment progress bar
-                progress += 1
-                percent = 100.0 * int(progress) / total
-                sys.stdout.write('\r')
-                sys.stdout.write("Completed: [{:{}}] {:>3}%"
-                                .format('='*int(percent/(100.0/bar_length)),
-                                    bar_length, int(percent)))
-                sys.stdout.flush()
-                time.sleep(0.002)
+                    #pass validated address plus the input
+                    parsed_response=av_result_parser_load.parse_av_response(address_validation_result, address_datastore[key])
+                    
+                    #add the primary key for the row
+                    parsed_response['primaryKey'] = key
+                    address_datastore[key] = parsed_response
+
+                    # Increment progress bar
+                    progress += 1
+                    percent = 100.0 * int(progress) / total
+                    sys.stdout.write('\r')
+                    sys.stdout.write("Completed: [{:{}}] {:>3}%"
+                                    .format('='*int(percent/(100.0/bar_length)),
+                                        bar_length, int(percent)))
+                    sys.stdout.write('\r')
+                    sys.stdout.flush()
+                    time.sleep(0.001)
+                except Exception as err:
+                    print(err)
                 
             return True
 
@@ -96,7 +106,7 @@ class HighVolumeAVMain:
     """
     def create_export_csv():
 
-        with open(config.output_csv, 'w') as outputCSV:
+        with open(config.output_csv, 'w', newline='') as outputCSV:
             csvWriter = csv.writer(outputCSV)
             
             # Get the output headers from the config file
@@ -105,21 +115,20 @@ class HighVolumeAVMain:
             csvWriter.writerow(header)
             with shelve.open(config.shelve_db) as address_shelve:
                 
-                for address in address_shelve.keys():
+                for key in address_shelve:
                     # The address going to be inserted in the cs
                     data = []
-                    # Create an empty array to write a line to the CSV file
-                    data.append(str(address))
-                    
+
+                    print(address_shelve[key].keys())
+
+                    print(len(header))
+
+                    for col in header:
+                        print(col)
                     # Grab the input address
                     for col in header:
-                        # We already have the input address
-                        if col == 'inputAddress':
-                            # Check to see if the relevent data exists in the shelf file
-                            continue
-
-                        if col in address_shelve[address]:
-                            data.append(address_shelve[address][col])
+                        if col in address_shelve[key]:
+                            data.append(address_shelve[key][col])
                         else:
                             # If not, write a blank cell
                             data.append('')
@@ -133,7 +142,7 @@ class HighVolumeAVMain:
     Store the content back as JSON
     """
     def create_export_json():
-
+        #THIS DOESNT WORK DONT USE 
         with open(config.output_csv, 'w') as output_csv:
             csvWriter = csv.writer(output_csv)
         #  
@@ -144,7 +153,7 @@ class HighVolumeAVMain:
         with shelve.open(config.shelve_db) as address_shelve:
                 
             outputJson=json.dumps(dict(address_shelve), indent=4 )
-            return outputJson
+            csvWriter.writerow(outputJson)
 
     # Store duplicate addresses, output_csv will process addresses once     
     def print_duplication():
