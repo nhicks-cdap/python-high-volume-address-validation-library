@@ -118,13 +118,7 @@ class HighVolumeAVMain:
                 for key in address_shelve:
                     # The address going to be inserted in the cs
                     data = []
-
-                    print(address_shelve[key].keys())
-
-                    print(len(header))
-
-                    for col in header:
-                        print(col)
+                    
                     # Grab the input address
                     for col in header:
                         if col in address_shelve[key]:

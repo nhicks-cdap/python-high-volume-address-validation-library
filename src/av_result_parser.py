@@ -64,7 +64,7 @@ class av_result_parser_class:
 
         Returns:
             _type_: _description_
-        """git 
+        """
             
         if run_mode == 1:
             """_summary_:
