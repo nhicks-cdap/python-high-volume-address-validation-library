@@ -77,13 +77,18 @@ class HighVolumeAVMain:
             for key in address_datastore:
                 try:
                     #pass address through without the primary key
-                    address_validation_result = gmaps.addressvalidation(address_datastore[key])
+                    address = address_datastore[key]
+                    addressWithoutType = address.split(' ',1)[1]
+                    addressType = address.split(' ')[0]
+
+                    address_validation_result = gmaps.addressvalidation(addressWithoutType)
 
                     #pass validated address plus the input
                     parsed_response=av_result_parser_load.parse_av_response(address_validation_result, address_datastore[key])
                     
                     #add the primary key for the row
                     parsed_response['primaryKey'] = key
+                    parsed_response['recordType'] = addressType
                     address_datastore[key] = parsed_response
 
                     # Increment progress bar
@@ -107,7 +112,7 @@ class HighVolumeAVMain:
     def create_export_csv():
 
         with open(config.output_csv, 'w', newline='') as outputCSV:
-            csvWriter = csv.writer(outputCSV)
+            csvWriter = csv.writer(outputCSV, delimiter='|')
             
             # Get the output headers from the config file
             header = config.output_columns
@@ -118,15 +123,15 @@ class HighVolumeAVMain:
                 for key in address_shelve:
                     # The address going to be inserted in the cs
                     data = []
-                    
-                    # Grab the input address
                     for col in header:
                         if col in address_shelve[key]:
                             data.append(address_shelve[key][col])
                         else:
+                            if col == 'hasUnconfirmedComponents':
+                                data.append(False)
+                            else:
                             # If not, write a blank cell
-                            data.append('')
-                            
+                                data.append("")
                     # Write a row to the csv file
                     csvWriter.writerow(data)
                     

@@ -13,12 +13,12 @@
 # limitations under the License.
 
 ## Location of the address file
-address_file : 'H:\\Desktop\\nad.csv'
+address_file : 'C:\addresses\in.csv'
 
 ## Provide the columns which needs to be concatenated to get the address
 # the first value will be the primary key and and should be the first column in the row.
 #must also contain the column which the primary key is in, and it MUST be the first column.
-column_numbers : [0,3,4,5,6,7]
+column_numbers : [0,1,2,3,4,5,6,7]
 
 # the colum the primary key for the row/entry is in
 # THE PRIMARY KEY CAN NOT HAVE A SPACE IN IT
@@ -31,10 +31,10 @@ shelve_db : 'addresses'
 separator : ' '
 
 ## API KEY
-api_key : ''
+api_key : 'AIzaSyCA1CxyuCFgBhuq2tYevDg36NbPRbnmLs0'
 
 ## Name of the output csv file
-output_csv : './output.csv'
+output_csv : 'C:\addresses\out.csv'
 
 ## Directory where to look for the db files
 directory : "./"
@@ -51,6 +51,7 @@ run_mode : 1
 # json doesnt work at the moment, do not use
 output_format: csv
 
-# Configure the columns to output
+# Configure the columns to outputss
 #output_columns: ['primaryKey', 'inputAddress', 'formattedAddress', 'addressLines', 'administrativeArea', 'postalCode', 'regionCode', 'hasUnconfirmedComponents']
-output_columns: ['primaryKey', 'inputAddress', 'formattedAddress']
+#output_columns: ['primaryKey', 'recordType', 'formattedAddress', 'addressLines', 'administrativeArea', 'postalCode', 'regionCode', 'hasUnconfirmedComponents' ]
+output_columns: ['primaryKey', 'recordType', 'formattedAddress', 'addressLines', 'administrativeArea', 'postalCode', 'regionCode', 'hasUnconfirmedComponents' ]

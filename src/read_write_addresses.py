@@ -89,7 +89,7 @@ class read_write_addressess_class:
         # creating a csv reader object
          
             csvreader = csv.reader(csvfile)
-      
+            headers = next(csvreader)
             # extracting field names through first row
             # extracting each data row one by one
             for row in csvreader:
